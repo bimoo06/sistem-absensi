@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id               String          @id @default(uuid())
+  username         String          @unique
+  password         String // should be hashed in production
+  name             String
+  role             String // "admin", "guru", "murid"
+  status           String          @default("Aktif")
+  gender           String? // L / P
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Guru Specific Fields
+  nik              String?
+  nip              String?
+  nuptk            String?
+  employmentStatus String?
+  birthDate        String?
+  homeSchool       String?
+
+  // Murid Specific Fields
+  nikSiswa         String?
+  nisn             String?
+  motherName       String?
+  gradeLevel       String?
+  studyGroup       String?
+
+  // Relations
+  histories        UpdateHistory[]
+  attendances      Attendance[]
+}
+
+model UpdateHistory {
+  id        Int      @id @default(autoincrement())
+  message   String
+  createdAt DateTime @default(now())
+
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+model Attendance {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @default(now())
+  status    String // "Hadir", "Sakit", "Izin", "Alfa"
+  time      String?
+  type      String?
+  note      String?
+
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
